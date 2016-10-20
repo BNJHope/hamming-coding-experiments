@@ -23,7 +23,7 @@ public class FileStreamCreator {
     public FileOutputStream createOutputStream(String fileName, int val) {
 
         //create the file name for the output encoded file.
-        String encodedFileName = this.constructOutputFilename(fileName);
+        String encodedFileName = this.constructOutputFilename(fileName, val);
 
         //create new file
         File outputFile = new File(encodedFileName);

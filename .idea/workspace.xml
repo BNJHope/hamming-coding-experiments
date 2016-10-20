@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="55b049bc-2c36-47c1-a101-739c618dd2a3" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/HammingModules/FileStreamCreator.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/HammingModules/FileStreamCreator.java" afterPath="$PROJECT_DIR$/HammingModules/FileStreamCreator.java" />
     </list>
     <ignored path="p2.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -44,21 +43,21 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="HammingEncoder.java" pinned="false" current-in-tab="true">
+      <file leaf-file-name="HammingEncoder.java" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/HammingModules/HammingEncoder.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="338">
-              <caret line="54" column="8" selection-start-line="54" selection-start-column="8" selection-end-line="54" selection-end-column="8" />
+            <state relative-caret-position="194">
+              <caret line="116" column="0" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="FileStreamCreator.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="FileStreamCreator.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/HammingModules/FileStreamCreator.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="234">
-              <caret line="79" column="38" selection-start-line="79" selection-start-column="0" selection-end-line="80" selection-end-column="0" />
+            <state relative-caret-position="180">
+              <caret line="25" column="75" selection-start-line="25" selection-start-column="75" selection-end-line="25" selection-end-column="75" />
               <folding />
             </state>
           </provider>
@@ -107,8 +106,8 @@
         <option value="$PROJECT_DIR$/HammingModules/HammingMain.java" />
         <option value="$PROJECT_DIR$/ErrorModels/BurstErrorModel.java" />
         <option value="$PROJECT_DIR$/HammingModules/FileStreamCreators.java" />
-        <option value="$PROJECT_DIR$/HammingModules/FileStreamCreator.java" />
         <option value="$PROJECT_DIR$/HammingModules/HammingEncoder.java" />
+        <option value="$PROJECT_DIR$/HammingModules/FileStreamCreator.java" />
       </list>
     </option>
   </component>
@@ -657,12 +656,12 @@
       <updated>1476882881764</updated>
       <workItem from="1476882883806" duration="599000" />
       <workItem from="1476965490034" duration="8009000" />
-      <workItem from="1476997520737" duration="4102000" />
+      <workItem from="1476997520737" duration="4178000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="12710000" />
+    <option name="totallyTimeSpent" value="12786000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="27" width="1366" height="741" extended-state="0" />
@@ -774,18 +773,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HammingModules/FileStreamCreator.java">
+    <entry file="file://$PROJECT_DIR$/HammingModules/HammingEncoder.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="234">
-          <caret line="79" column="38" selection-start-line="79" selection-start-column="0" selection-end-line="80" selection-end-column="0" />
+        <state relative-caret-position="194">
+          <caret line="116" column="0" selection-start-line="116" selection-start-column="0" selection-end-line="116" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/HammingModules/HammingEncoder.java">
+    <entry file="file://$PROJECT_DIR$/HammingModules/FileStreamCreator.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="338">
-          <caret line="54" column="8" selection-start-line="54" selection-start-column="8" selection-end-line="54" selection-end-column="8" />
+        <state relative-caret-position="180">
+          <caret line="25" column="75" selection-start-line="25" selection-start-column="75" selection-end-line="25" selection-end-column="75" />
           <folding />
         </state>
       </provider>
