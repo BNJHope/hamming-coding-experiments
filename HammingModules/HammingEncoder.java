@@ -45,7 +45,7 @@ public class HammingEncoder {
 
         //a buffer that will store the bits read in from the file
         //and another one for storing bits to be written to the file.
-        String inBuffer = "", outBuffer = "", charToBeWritten = "";
+        String inBuffer = "", currBuffer = "", outBuff = "" ,charToBeWritten = "";
 
         //set up the file streams to be used for writing and reading to a file.
         this.setUpFileStreams(filename, val);
@@ -59,6 +59,10 @@ public class HammingEncoder {
 
                 //convert the input from the file into the input buffer
                 inBuffer = this.convertIntToBits(inputFromFile);
+                while(inBuffer.length() >= this.dimension) {
+                    currBuffer = inBuffer.substring(0, this.dimension);
+                    outBuff +=
+                }
             }
         } catch (IOException e) {
             System.err.println("Error reading file stream.\nClosing.");
@@ -117,5 +121,18 @@ public class HammingEncoder {
 
     }
 
+    /**
+     * Encodes the given bit string into a Hamming code word with parity bits.
+     * @param strToConvert The string to convert into a Hamming code word.
+     * @return The code word that results from using Hamming encoding on the given string.
+     */
+    public String convertToHamming(String strToConvert) {
+        //the result of applying Hamming encoding on the string to convert.
+        char[] result = new char[this.wordLength - 1];
+
+
+
+        return new String(result);
+    }
 }
 
