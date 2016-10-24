@@ -1,6 +1,7 @@
 package HammingModules;
 
 import java.io.*;
+import java.util.HashMap;
 
 /**
  * Created by bnjhope on 20/10/16.
@@ -8,7 +9,7 @@ import java.io.*;
 public class HammingEncoder {
 
     /**
-     * The result fthat occurs from reading the file
+     * The result that occurs from reading the file
      * when the reader has reached the end of the file.
      */
     private static final int EOFCONST = -1;
@@ -32,6 +33,11 @@ public class HammingEncoder {
      * The output stream for the encoded file.
      */
     private FileOutputStream output;
+
+    /**
+     * Maps a word to its corresponding codeword if it has previously been constructed.
+     */
+    private HashMap<String, String> existingCodes = new HashMap();
 
     /**
      * Encode the given file with Hamming coding and interleaving.
@@ -72,7 +78,7 @@ public class HammingEncoder {
 
     /**
      * Sets up the input and output file stream for the encoding.
-     * @param filename The name of the file to be read.
+     * @param pathOfFile The name of the file to be read.
      * @param val The value which the encoder is using for length of word and dimension.
      */
     private void setUpFileStreams(String pathOfFile, int val) {
@@ -127,12 +133,113 @@ public class HammingEncoder {
      * @return The code word that results from using Hamming encoding on the given string.
      */
     public String convertToHamming(String strToConvert) {
-        //the result of applying Hamming encoding on the string to convert.
-        char[] result = new char[this.wordLength - 1];
 
+        //if the Hamming code for the given string has previously been constructed then fetch it from the Hashmap
+        //that maps words to its corresponding Hamming code.
+        if(this.existingCodes.containsKey(strToConvert))
+            return this.existingCodes.get(strToConvert);
+
+        //the result of applying Hamming encoding on the string to convert.
+        char[] result = this.constructHammingTemplateString(strToConvert);
 
 
         return new String(result);
     }
+
+    /**
+     * Makes a new char array that inserts that 'p' character where a partiy bit will lie in a Hamming code.
+     * @param strToConvert The string to produce the template for.
+     * @return A char array that has 'p' where a parity bit should lie in the Hamming code.
+     */
+    public char[] constructHammingTemplateString(String strToConvert) {
+
+        //the array that will contain the parity bit locations and raw characters.
+        char[] result = new char[this.wordLength - 1];
+
+        //current position of where in strToConvert we have got to in filling the array with actual data bits
+        int strPos = 0;
+
+        //for every space in the array check to see if its a power of two or not. If it is, then mark it as a parity bit.
+        for(int i = 0; i < result.length; i++) {
+
+            //if the bit at the position i + 1 is a power of 2 then it must be a parity bit
+            //so we set its value to 'p' in the array.
+            //otherwise, fill out the value of the array with the value of the string
+            // at its current position.
+            if(((i + 1) & i) == 0) {
+                result[i] = 'p';
+            } else {
+                result[i] =  strToConvert.charAt(strPos++);
+            }
+
+        }
+
+        return result;
+    }
+
+    public char[] calculateParityBits(char[] arrayToCheck) {
+
+        //represents the difference between a single digit integer and its ASCII value
+        final int ASCIIStep = 48;
+
+        //a holder value for calculating the parity bit,
+        //a stepper that determines how far into the array the parity bit is in checking if it should be a 1 or 0,
+        //and the power of two which the parity bit holds
+        int parityBit = 0, parityStepper = 0, powerValue = 0;
+
+        //determines if we are counting the current characters in the array as
+        boolean isParitySegment = true;
+
+        //the character to check to see for parity
+        char currentChar = '\0';
+
+        for(int i = 0; i < arrayToCheck.length; i++) {
+            if(arrayToCheck[i] == 'p') {
+                //get the power of 2 value by calculating log base 2 of the position of the bit in the Hamming code.
+                powerValue = (int) (Math.log(i + 1) / Math.log(2));
+
+                //this loop determines the value of the parity bit by starting from the position of the parity bit
+                //and going to the end of the array and checking the parity of values where necessary
+                for(int j = i; j < arrayToCheck.length; j++) {
+
+                    //if the checker is currently in a section for checking the parity of a bit then
+                    //perform the XOR on a bit to either flip the current parity bit that we are tracking
+                    // if the character at the current index of the array is a 1 or keep it in its
+                    //current state if the character we are checking is a 0.
+                    if(isParitySegment = true) {
+
+                        //get the current character from the array using the inner index
+                        currentChar = arrayToCheck[j];
+
+                        //if we come across a parity bit then we ignore it. This only happens for the very first character
+                        //of the search, as later parity bits will not be found in stretches of bits that influence the
+                        //parity bit.
+                        if(!(currentChar == 'p')) {
+
+                            //XOR the parity bit with the numeric value of the curent bit in the array.
+                            parityBit ^= Character.getNumericValue(currentChar);
+                        }
+                    }
+
+                    //whether we are in a checking phase or not, increase the phase stepper
+                    parityStepper++;
+
+                    //if the phase stepper is equal to the power value i.e we have reached the limit of a phase
+                    //then that means we flip out of/into a checking phase and we reset the phase stepper to 0.
+                    if(parityStepper == powerValue) {
+                        parityStepper = 0;
+                        isParitySegment = !isParitySegment;
+                    }
+
+                }
+
+                //once we have calculated the parity bit, place it in the position of the 'p' that we just determined.
+                arrayToCheck[i] = (char) (ASCIIStep + parityBit);
+            }
+        }
+
+        return arrayToCheck;
+    }
+
 }
 
