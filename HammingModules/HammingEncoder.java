@@ -280,12 +280,40 @@ public class HammingEncoder {
      */
     private String convertToHamming(String strToConvert) {
 
-        char[] result = new char[wordLength];
+        //the resulting character array that we get from the matrix multiplication
+        char[] result = new char[wordLength], strToConvertCharArray = strToConvert.toCharArray();
 
+        //the bit to add to the result array that is calculated from the generator matrix
+        char bitToAdd;
 
+        //calculate every bit of the result to add
+        for(int i = 0; i < result.length; i++) {
+            bitToAdd = multiplyRows(this.generator[i], strToConvertCharArray);
+            result[i] = bitToAdd;
+        }
 
         return new String(result);
     }
 
+    /**
+     * Perform matrix multiplcation modulo 2 on two given rows.
+     * @param row1 The first to perform the multiplcation on.
+     * @param row2 The second row to perform the multiplcation on.
+     * @return The result of the multiplcation modulo 2, given as a char.
+     */
+    private char multiplyRows(char[] row1, char[] row2) {
+
+        //the step between a digit and its ascii representation
+        final int asciiStep = 48;
+
+        //the sum of the bits resulting from the matrix multiplcation
+        int sum = 0;
+
+        for(int i = 0; i < row1.length; i++) {
+            sum += Character.valueOf(row1[i]) * Character.valueOf(row2[i]);
+        }
+
+        return(char) ((sum % 2) + asciiStep);
+    }
 }
 
