@@ -21,7 +21,7 @@ public class HammingEncoder {
     private int wordLength;
 
     /**
-     * The dimension (i.e number of bits that actually contain data) in the Hammaing code word.
+     * The dimension (i.e number of bits that actually contain data) in the Hamming code word.
      */
     private int dimension;
 
@@ -205,7 +205,7 @@ public class HammingEncoder {
                 }
 
                 //since we do not check the start of the word for later characters, but we know these
-                //will begin with 0, we can fillthe beginning of a parity row in the generator matrix with
+                //will begin with 0, we can fill the beginning of a parity row in the generator matrix with
                 //0s if we know that after this process of calculating it that it is not as long as the dimension
                 if(generatorString.length() < dimension)
                     generatorString = fillStartWith0s(generatorString);
@@ -296,21 +296,21 @@ public class HammingEncoder {
     }
 
     /**
-     * Perform matrix multiplcation modulo 2 on two given rows.
-     * @param row1 The first to perform the multiplcation on.
-     * @param row2 The second row to perform the multiplcation on.
-     * @return The result of the multiplcation modulo 2, given as a char.
+     * Perform matrix multiplication modulo 2 on two given rows.
+     * @param row1 The first to perform the multiplication on.
+     * @param row2 The second row to perform the multiplication on.
+     * @return The result of the multiplication modulo 2, given as a char.
      */
     private char multiplyRows(char[] row1, char[] row2) {
 
         //the step between a digit and its ascii representation
         final int asciiStep = 48;
 
-        //the sum of the bits resulting from the matrix multiplcation
+        //the sum of the bits resulting from the matrix multiplication
         int sum = 0;
 
         for(int i = 0; i < row1.length; i++) {
-            sum += Character.valueOf(row1[i]) * Character.valueOf(row2[i]);
+            sum += Character.getNumericValue(row1[i]) * Character.getNumericValue(row2[i]);
         }
 
         return(char) ((sum % 2) + asciiStep);
