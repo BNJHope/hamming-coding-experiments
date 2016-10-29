@@ -44,6 +44,11 @@ public class HammingDecoder {
     private FileOutputStream output;
 
     /**
+     * Manages the interleaving process.
+     */
+    private InterleavingManager interleaveManager;
+
+    /**
      * Decodes a given file. Determines the dimension, word length and interleaving height from the file name.
      * @param filename The file to decode.
      */
@@ -51,13 +56,30 @@ public class HammingDecoder {
         //sets the values of dimension, word length and interleaving table height from the file name
         this.setFilenameValues(filename);
 
+        //set up the input and output file streams
+        this.setUpFileStreams(filename);
+
+        //instantiate the interleaving manager from the value given by the file name
+        this.interleaveManager = new InterleavingManager(this.interleaveHeight);
+
+        //construct the error correction matrix using the values from the file name
+        this.constructErrorCorrectionMatrix();
+
+        //construct the decoder matrix using the values from the file name
+        this.constructDecoderMatrix();
 
     }
 
+    /**
+     * Constructs the error correction matrix from the values fetched by the file name of the input file.
+     */
     private void constructErrorCorrectionMatrix() {
 
     }
 
+    /**
+     * Constructs the decoder matrix from the values fetched by the file name of the input file.
+     */
     private void constructDecoderMatrix() {
 
     }

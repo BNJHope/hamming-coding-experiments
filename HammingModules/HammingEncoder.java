@@ -361,19 +361,38 @@ public class HammingEncoder {
      */
     private String convertToHamming(String strToConvert) {
 
-        //the resulting character array that we get from the matrix multiplication
-        char[] result = new char[wordLength], strToConvertCharArray = strToConvert.toCharArray();
+        //the result to be returned.
+        String result;
 
-        //the bit to add to the result array that is calculated from the generator matrix
-        char bitToAdd;
+        //if the string that needs to be converted to a Hamming code has already been seen before and so there is a code
+        //for it then fetch it from the existing codes map instead of recalculating it.
+        //If this is the first time that it has been seen then we have to calculate it first.
+        if (this.existingCodes.containsKey(strToConvert)) {
 
-        //calculate every bit of the result to add
-        for(int i = 0; i < result.length; i++) {
-            bitToAdd = multiplyRows(this.generator[i], strToConvertCharArray);
-            result[i] = bitToAdd;
+            result = this.existingCodes.get(strToConvert);
+
+        } else {
+            //the resulting character array that we get from the matrix multiplication
+            char[] resultChars = new char[wordLength], strToConvertCharArray = strToConvert.toCharArray();
+
+            //the bit to add to the result array that is calculated from the generator matrix
+            char bitToAdd;
+
+            //calculate every bit of the result to add
+            for (int i = 0; i < resultChars.length; i++) {
+                bitToAdd = multiplyRows(this.generator[i], strToConvertCharArray);
+                resultChars[i] = bitToAdd;
+            }
+
+            //create the result string by converting the character array into a string
+            result = new String(resultChars);
+
+            //put the new code into the hashmap with the string passed to the function as the key
+            this.existingCodes.put(strToConvert,result);
+
         }
 
-        return new String(result);
+        return result;
     }
 
     /**
