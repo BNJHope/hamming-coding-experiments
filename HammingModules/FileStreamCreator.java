@@ -13,17 +13,19 @@ public class FileStreamCreator {
      */
     private static final String fileEncodeKeyword = "huff-encode";
 
+    private static final String fileDecodeKeyword = "huff-deocde";
+
     /**
      * Creates the output stream and assigns the object's file output stream
      * with the one that was created from this method.
-     * @param filename The name of the file to be used in the output stream.
+     * @param fileName The name of the file to be used in the output stream.
      * @param val The value which the encoder is using for length of word and dimension.
      * @return The output stream for the file passed to the method.
      */
-    public FileOutputStream createOutputStream(String fileName, int val) {
+    public FileOutputStream createOutputStream(String fileName, int val, boolean isEncoder) {
 
         //create the file name for the output encoded file.
-        String encodedFileName = this.constructOutputFilename(fileName, val);
+        String encodedFileName = this.constructEncoderOutputFilename(fileName, val);
 
         //create new file
         File outputFile = new File(encodedFileName);
@@ -73,14 +75,13 @@ public class FileStreamCreator {
         return fin;
     }
 
-
     /**
      * Creates the file name for the encoded file using the file name given to the program.
      * @param pathOfFile The name of the original file.
      * @param val The value which the encoder is using for length of word and dimension.
      * @return The name of the file which this program outputs.
      */
-    public String constructOutputFilename(String pathOfFile, int val) {
+    private String constructEncoderOutputFilename(String pathOfFile, int val) {
         //extract the path to the file
         String path = pathOfFile.substring(0, pathOfFile.lastIndexOf("/"));
 
@@ -94,6 +95,10 @@ public class FileStreamCreator {
         //Return the encoded file name, made up of the file name components from the original file name and the encoded keyword added
         return (path + "/" + encodedFileNameComps[0] + "." + fileEncodeKeyword + val + "." + encodedFileNameComps[1]);
 
+    }
+
+    private String constructDecoderOutputFilename(String pathOfFile) {
+        return pathOfFile.replace(fileEncodeKeyword, fileDecodeKeyword);
     }
 
 }

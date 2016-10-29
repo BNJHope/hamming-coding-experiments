@@ -96,7 +96,7 @@ public class HammingEncoder {
         FileStreamCreator streamCreator = new FileStreamCreator();
 
         //create the output stream with the constructed file name
-        this.output = streamCreator.createOutputStream(pathOfFile, val);
+        this.output = streamCreator.createOutputStream(pathOfFile, val, true);
 
         //creates the input stream using the name of the file given to the
         //program.
@@ -125,7 +125,7 @@ public class HammingEncoder {
                 //if the provided value is not greater than or equal to 2 then we must quit the program.
                 //otherwise, set the value of twoPower to 2^val cast as an integer.
                 if(val < 2) {
-                    System.err.println("Value for length and dimesion must be greater than or equal to 2.\nExiting.");
+                    System.err.println("Value for length and dimension must be greater than or equal to 2.\nExiting.");
                     System.exit(0);
                 } else
                     twoPower = (int) Math.pow(2, (double) val);
