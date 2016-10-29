@@ -10,7 +10,9 @@ public class HammingMain {
         String fileName = args[0];
         int val = Integer.parseInt(args[1]), interleaveHeight = Integer.parseInt(args[5]);
         double pOfError = Double.parseDouble(args[2]), pOfGoodToBad = Double.parseDouble(args[3]), pOfBadToGood = Double.parseDouble(args[4]);
-        HammingEncoder encoder = new HammingEncoder();
-        encoder.encode(fileName, val, pOfError, pOfGoodToBad, pOfBadToGood, interleaveHeight);
+//        HammingEncoder encoder = new HammingEncoder();
+//        encoder.encode(fileName, val, pOfError, pOfGoodToBad, pOfBadToGood, interleaveHeight);
+        HammingDecoder decoder = new HammingDecoder();
+        decoder.decode(fileName);
     }
 }

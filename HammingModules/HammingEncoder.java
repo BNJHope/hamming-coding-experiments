@@ -334,7 +334,7 @@ public class HammingEncoder {
 
     /**
      * Creates a character array with '1' placed on data parts and 'p' placed on parity bit positions
-     * @return
+     * @return A character array with '1' at data bits and 'p' at parity bits
      */
     private char[] createHammingString() {
 
