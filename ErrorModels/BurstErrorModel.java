@@ -34,10 +34,10 @@ public class BurstErrorModel implements ITransmissionError {
     private double pOfError;
 
 
-    public BurstErrorModel(double pOfGoodToBad, double pOfBadToGood, double pOfError) {
+    public BurstErrorModel(double pOfError,double pOfGoodToBad, double pOfBadToGood) {
+        this.pOfError = pOfError;
         this.pOfGoodToBad = pOfGoodToBad;
         this.pOfBadToGood = pOfBadToGood;
-        this.pOfError = pOfError;
 
         //makes a new instance of a random number generator for the random number
         //generator of this model

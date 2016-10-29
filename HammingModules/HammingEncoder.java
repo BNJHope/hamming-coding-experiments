@@ -1,5 +1,7 @@
 package HammingModules;
 
+import ErrorModels.BurstErrorModel;
+
 import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -46,21 +48,45 @@ public class HammingEncoder {
     private HashMap<String, String> existingCodes = new HashMap();
 
     /**
-     * Encode the given file with Hamming coding and interleaving.
-     * @param val The value which the encoder is using for length of word and dimension.
-     * @param filename The name of the file to be encoded.
+     * Manages the interleaving process.
      */
-    public void encode(String filename, int val) {
+    private InterleavingManager interleaveManager;
 
-        //the input from the file
-        int inputFromFile = 0;
+    /**
+     * The burst error model to be used for transmission.
+     */
+    private BurstErrorModel errModel;
+
+    /**
+     * Encodes the file using the given parameters for the burst error model and the height of the interleave table.
+     * @param filename The file to encode.
+     * @param val The value to determine the dimension and word length of the encoding.
+     * @param pOfError The probability of an error in the burst error model.
+     * @param pOfGoodToBad The probability of transitioning from a good to a bad state in the burst error model.
+     * @param pOfBadToGood The probability of transitioning from a good to a bad state in the burst error model.
+     * @param interleaveHeight The height and width of the interleaving table to be used by the interleaver.
+     */
+    public void encode(String filename, int val, double pOfError, double pOfGoodToBad, double pOfBadToGood, int interleaveHeight) {
+
+        //instantiates the burst error model
+        this.errModel = new BurstErrorModel(pOfError, pOfGoodToBad, pOfBadToGood);
+
+        //instantiates the interleave manager of this Hamming Encoder
+        this.interleaveManager = new InterleavingManager(interleaveHeight);
+
+        //the input from the file and the size of the interleave table
+        int inputFromFile = 0, interleaveTableSize = (int) Math.pow(interleaveHeight, 2);
+
+        //the number of bits in a byte - when we have a string of bits, we need to figure out when it is this long
+        //so that it can be written to the file.
+        final int bitsLimit = 8;
 
         //a buffer that will store the bits read in from the file
         //and another one for storing bits to be written to the file.
-        String inBuffer = "", currBuffer = "", outBuff = "" ,charToBeWritten = "";
+        String inBuffer = "", currBuffer = "", outBuff = "" , interleaveOutput = "", charToBeWritten = "";
 
         //set up the file streams to be used for writing and reading to a file.
-        this.setUpFileStreams(filename, val);
+        this.setUpFileStreams(filename, val, interleaveHeight);
 
         //calculate the length and the dimension for Hamming coder using the value provided.
         this.calculateLengthAndDimension(val);
@@ -77,8 +103,23 @@ public class HammingEncoder {
                 while(inBuffer.length() >= this.dimension) {
                     currBuffer = inBuffer.substring(0, this.dimension);
                     outBuff += this.convertToHamming(currBuffer);
+
+                    while(outBuff.length() >= interleaveTableSize) {
+                        interleaveOutput = this.interleaveManager.encode(outBuff.substring(0, interleaveTableSize));
+                        outBuff = outBuff.substring(interleaveTableSize);
+                    }
+
+                    while(interleaveOutput.length() >= bitsLimit) {
+                        charToBeWritten = this.generateErrorString(interleaveOutput.substring(0, bitsLimit));
+                        outputToFile(charToBeWritten);
+                        interleaveOutput = interleaveOutput.substring(bitsLimit);
+                    }
+
+                    inBuffer = inBuffer.substring(this.dimension);
                 }
             }
+
+
         } catch (IOException e) {
             System.err.println("Error reading file stream.\nClosing.");
             System.exit(0);
@@ -86,17 +127,56 @@ public class HammingEncoder {
     }
 
     /**
+     * Creates errors in a string of bits using the burst error model.
+     * @param strForErrors The string to produce errors for.
+     * @return The string of bits with errors in depending on the burst error model.
+     */
+    private String generateErrorString(String strForErrors) {
+
+        //the resulting string to return
+        String result = "";
+
+        for(int i = 0; i < strForErrors.length(); i++) {
+            if(this.errModel.flip()) {
+                result += (strForErrors.charAt(i) == '0') ? '1' : '0';
+            } else {
+                result += strForErrors.charAt(i);
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Writes the given string of bits to the file.
+     * @param strToWrite The bits to write to the file.
+     */
+    private void outputToFile(String strToWrite) {
+
+        //turns the string of bits into the integer that it represents so that it can be written to the file.
+        int infoToWrite = Integer.parseInt(strToWrite, 2);
+
+        try {
+            this.output.write(infoToWrite);
+        } catch (IOException e) {
+            System.err.println("Problem writing with output stream.\nExiting");
+            System.exit(1);
+        }
+
+    }
+
+    /**
      * Sets up the input and output file stream for the encoding.
      * @param pathOfFile The name of the file to be read.
      * @param val The value which the encoder is using for length of word and dimension.
      */
-    private void setUpFileStreams(String pathOfFile, int val) {
+    private void setUpFileStreams(String pathOfFile, int val, int interleaveHeight) {
 
         //create a new file stream creator
         FileStreamCreator streamCreator = new FileStreamCreator();
 
         //create the output stream with the constructed file name
-        this.output = streamCreator.createOutputStream(pathOfFile, val, true);
+        this.output = streamCreator.createOutputStream(pathOfFile, val, interleaveHeight, true);
 
         //creates the input stream using the name of the file given to the
         //program.

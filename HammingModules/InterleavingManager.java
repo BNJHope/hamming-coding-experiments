@@ -49,7 +49,7 @@ public class InterleavingManager {
      * Adds the string to the table row by row.
      * @param strToEncode The string to add to the table.
      */
-    public void encodeIn(String strToEncode) {
+    private void encodeIn(String strToEncode) {
 
         int index = 0;
 
@@ -64,7 +64,7 @@ public class InterleavingManager {
      * Adds the string to the table column by column.
      * @param strToDecode The string to add to the table.
      */
-    public void decodeIn(String strToDecode) {
+    private void decodeIn(String strToDecode) {
 
         int index = 0;
 
@@ -79,7 +79,7 @@ public class InterleavingManager {
      * Reads the string from the table column by column.
      * @return The result of reading bits column by column.
      */
-    public String encodeOut() {
+    private String encodeOut() {
 
         String result = "";
 
@@ -96,7 +96,7 @@ public class InterleavingManager {
      * Reads the string from the table row by row.
      * @return The result of reading bits row by row.
      */
-    public String decodeOut() {
+    private String decodeOut() {
 
         String result = "";
 

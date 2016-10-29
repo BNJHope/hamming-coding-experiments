@@ -11,9 +11,9 @@ public class FileStreamCreator {
      * The keyword to be added to the file name to show that it is a file that
      * has been huffman encoded.
      */
-    private static final String fileEncodeKeyword = "huff-encode";
+    public static final String fileEncodeKeyword = "huff-encode";
 
-    private static final String fileDecodeKeyword = "huff-deocde";
+    public static final String fileDecodeKeyword = "huff-deocde";
 
     /**
      * Creates the output stream and assigns the object's file output stream
@@ -22,13 +22,13 @@ public class FileStreamCreator {
      * @param val The value which the encoder is using for length of word and dimension.
      * @return The output stream for the file passed to the method.
      */
-    public FileOutputStream createOutputStream(String fileName, int val, boolean isEncoder) {
+    public FileOutputStream createOutputStream(String fileName, int val, int interleaveHeight, boolean isEncoder) {
 
         //create the file name for the output encoded file.
-        String encodedFileName = this.constructEncoderOutputFilename(fileName, val);
+        String newFileName = isEncoder ? this.constructEncoderOutputFilename(fileName, val, interleaveHeight) : this.constructDecoderOutputFilename(fileName);
 
         //create new file
-        File outputFile = new File(encodedFileName);
+        File outputFile = new File(newFileName);
 
         //The output stream of the given file name
         FileOutputStream fout = null;
@@ -37,7 +37,7 @@ public class FileStreamCreator {
         try {
             outputFile.createNewFile();
         } catch (IOException e) {
-            System.err.println("Error creating new file " + encodedFileName + " : exiting");
+            System.err.println("Error creating new file " + newFileName + " : exiting");
             System.exit(0);
         }
 
@@ -45,7 +45,7 @@ public class FileStreamCreator {
         try {
             fout = new FileOutputStream(outputFile);
         } catch (FileNotFoundException e) {
-            System.err.println("Error creating new file output stream for " + encodedFileName + ": exiting");
+            System.err.println("Error creating new file output stream for " + newFileName + ": exiting");
             System.exit(0);
         }
 
@@ -79,9 +79,10 @@ public class FileStreamCreator {
      * Creates the file name for the encoded file using the file name given to the program.
      * @param pathOfFile The name of the original file.
      * @param val The value which the encoder is using for length of word and dimension.
+     * @param interleaveHeight The height of the interleave table used in encoding.
      * @return The name of the file which this program outputs.
      */
-    private String constructEncoderOutputFilename(String pathOfFile, int val) {
+    private String constructEncoderOutputFilename(String pathOfFile, int val, int interleaveHeight) {
         //extract the path to the file
         String path = pathOfFile.substring(0, pathOfFile.lastIndexOf("/"));
 
@@ -93,12 +94,27 @@ public class FileStreamCreator {
         String[] encodedFileNameComps = filename.split("\\.", 2);
 
         //Return the encoded file name, made up of the file name components from the original file name and the encoded keyword added
-        return (path + "/" + encodedFileNameComps[0] + "." + fileEncodeKeyword + val + "." + encodedFileNameComps[1]);
+        return (path + "/" + encodedFileNameComps[0] + "." + fileEncodeKeyword + val + "-" + interleaveHeight + "." + encodedFileNameComps[1]);
 
     }
 
+    /**
+     * Constructs the name of the file after Hamming decoding
+     * @param pathOfFile The path of the file to change for the new file name
+     * @return The name of the new decode file.
+     */
     private String constructDecoderOutputFilename(String pathOfFile) {
-        return pathOfFile.replace(fileEncodeKeyword, fileDecodeKeyword);
+        //extract the path to the file
+        String path = pathOfFile.substring(0, pathOfFile.lastIndexOf("/"));
+
+        //retrieve the raw file name by removing everything before the raw file name
+        String filename = pathOfFile.substring(pathOfFile.lastIndexOf("/") + 1);
+
+        //The encode file name with the encode keyword replaced by the decode keyword in the file name
+        String newFileName = filename.replace("." + fileEncodeKeyword, "." + fileDecodeKeyword);
+
+        //Return new file path for the decode file.
+        return (path + "/" + newFileName);
     }
 
 }
