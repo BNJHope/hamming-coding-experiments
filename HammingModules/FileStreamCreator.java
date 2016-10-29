@@ -16,16 +16,54 @@ public class FileStreamCreator {
     public static final String fileDecodeKeyword = "huff-deocde";
 
     /**
-     * Creates the output stream and assigns the object's file output stream
+     * Creates the output stream for a decoder and assigns the object's file output stream
+     * with the one that was created from this method.
+     * @param fileName The name of the file to be used in the output stream.
+     * @return The output stream for the file passed to the method.
+     */
+    public FileOutputStream createDecoderOutputStream(String fileName) {
+
+        //the file name for the output stream file.
+        String newFileName = this.constructDecoderOutputFilename(fileName);
+
+        //create new file
+        File outputFile = new File(newFileName);
+
+        //The output stream of the given file name
+        FileOutputStream fout = null;
+
+        //create new file from file name
+        try {
+            outputFile.createNewFile();
+        } catch (IOException e) {
+            System.err.println("Error creating new file " + newFileName + " : exiting");
+            System.exit(0);
+        }
+
+        //create file output stream from the new file
+        try {
+            fout = new FileOutputStream(outputFile);
+        } catch (FileNotFoundException e) {
+            System.err.println("Error creating new file output stream for " + newFileName + ": exiting");
+            System.exit(0);
+        }
+
+        //assign the object's file output stream to the one we just created using the new file names
+        return fout;
+
+    }
+    /**
+     * Creates the output stream for an encoder and assigns the object's file output stream
      * with the one that was created from this method.
      * @param fileName The name of the file to be used in the output stream.
      * @param val The value which the encoder is using for length of word and dimension.
+     * @param interleaveHeight The height of the interleaving table used.
      * @return The output stream for the file passed to the method.
      */
-    public FileOutputStream createOutputStream(String fileName, int val, int interleaveHeight, boolean isEncoder) {
+    public FileOutputStream createEncoderOutputStream(String fileName, int val, int interleaveHeight) {
 
         //create the file name for the output encoded file.
-        String newFileName = isEncoder ? this.constructEncoderOutputFilename(fileName, val, interleaveHeight) : this.constructDecoderOutputFilename(fileName);
+        String newFileName = this.constructEncoderOutputFilename(fileName, val, interleaveHeight);
 
         //create new file
         File outputFile = new File(newFileName);

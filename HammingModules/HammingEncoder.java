@@ -169,6 +169,7 @@ public class HammingEncoder {
      * Sets up the input and output file stream for the encoding.
      * @param pathOfFile The name of the file to be read.
      * @param val The value which the encoder is using for length of word and dimension.
+     * @param interleaveHeight The height of the interleaving table.
      */
     private void setUpFileStreams(String pathOfFile, int val, int interleaveHeight) {
 
@@ -176,7 +177,7 @@ public class HammingEncoder {
         FileStreamCreator streamCreator = new FileStreamCreator();
 
         //create the output stream with the constructed file name
-        this.output = streamCreator.createOutputStream(pathOfFile, val, interleaveHeight, true);
+        this.output = streamCreator.createEncoderOutputStream(pathOfFile, val, interleaveHeight);
 
         //creates the input stream using the name of the file given to the
         //program.
