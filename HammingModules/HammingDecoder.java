@@ -2,12 +2,20 @@ package HammingModules;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 
 /**
  * Created by bnjhope on 28/10/16.
  */
 public class HammingDecoder {
+
+    /**
+     * The result that occurs from reading the file
+     * when the reader has reached the end of the file.
+     */
+    private static final int EOFCONST = -1;
 
     /**
      * The dimension of the Hamming codes in the file.
@@ -50,10 +58,27 @@ public class HammingDecoder {
     private InterleavingManager interleaveManager;
 
     /**
+     * The number of errors detected in the decoding procedure.
+     */
+    private int errorCount;
+
+    /**
+     * Maps a codeword to its corresponding word if it has previously been constructed.
+     */
+    private HashMap<String, String> existingCodes;
+
+    /**
      * Decodes a given file. Determines the dimension, word length and interleaving height from the file name.
      * @param filename The file to decode.
      */
     public void decode(String filename) {
+
+        //initialises the existing codes map
+        this.existingCodes = new HashMap();
+
+        //initialise the error count at 0
+        this.errorCount = 0;
+
         //sets the values of dimension, word length and interleaving table height from the file name
         this.setFilenameValues(filename);
 
@@ -66,6 +91,141 @@ public class HammingDecoder {
         //construct the error correction and decoder matrices using the values from the file name
         this.constructMatrices();
 
+        //the value read in from the input file,
+        //and the size of the interleaving table
+        int intToReadIn = 0, interleaveSize = (int) Math.pow(this.interleaveHeight, 2);
+
+        //string buffers of bits for reading in from the file and writing to the output file.
+        String inBuff = "", interleaveOutput = "", charToWrite = "";
+
+        //try to read in from the file input stream
+        try {
+
+            //while the file reader has not reached the end of the file, carry out the error correction and decode process
+            while((intToReadIn = this.input.read()) != EOFCONST) {
+
+                //add the bit representation of the character we just read in onto the end of the buffer
+                inBuff += this.convertToBitString(intToReadIn);
+
+                //while the buff is longer than or equal to the size of the interleave table,
+                //process the characters through the table so that they can be checked for errors and decoded
+                while(inBuff.length() >= interleaveSize) {
+                    interleaveOutput += this.interleaveManager.decode(inBuff.substring(0, interleaveSize));
+                    inBuff = inBuff.substring(interleaveSize);
+                }
+
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    /**
+     * Converts a given integer into a string of 8 bits.
+     * @param intToConvert The integer to convert into bits.
+     * @return The integer in the form of 8 bits.
+     */
+    private String convertToBitString(int intToConvert) {
+
+        //convert the integer given to the function into a binary string
+        String result = Integer.toBinaryString(intToConvert);
+
+        //add 0s to the front of the string of bits until it has 8 bits in the string, as the toBinaryString method
+        //does not add any 0 bits to the front if they are redundant
+        while(result.length() < 8) {
+            result = '0' + result;
+        }
+
+        return result;
+    }
+
+    /**
+     * Checks a word from the file for errors and corrects them if it detects that there are any.
+     * @param wordToCheck The word to check for errors.
+     * @return The word given with any error corrections if any are detected.
+     */
+    private String checkForErrors(String wordToCheck) {
+
+        //the word converted into a character array.
+        char[] wordArray = wordToCheck.toCharArray();
+
+        //holds the errors when detected and their positions
+        char[] syndrome = new char[this.wordlength - this.dimension];
+
+        //the sum of the values after the syndrome matrix has been determined
+        int syndromeSum = 0;
+
+        //fill in the syndrome matrix by multiplying the error correction matrix and the given word
+        for(int i = 0; i < syndrome.length; i++) {
+            syndrome[i] = this.multiplyRows(this.errorCorrectionMatrix[i], wordArray);
+            if(syndrome[i] != '0') {
+                syndromeSum += Math.pow(2, i);
+            }
+
+        }
+
+        //if errors were found then increase the error count and correct the error
+        if(syndromeSum != 0) {
+            this.errorCount++;
+            wordArray[syndromeSum - 1] = (wordArray[syndromeSum - 1] == '0') ? '1' : '0';
+        }
+
+        return new String(wordArray);
+    }
+
+    /**
+     * Decodes an error corrected word so it can be written to the file.
+     * @param bitsToDecode The string of bits to decode.
+     * @return The decode value.
+     */
+    private String decodeCorrectedCode(String bitsToDecode) {
+
+        //the result that is either found in the existing codes map or
+        //is calculated
+        String result;
+
+        if(this.existingCodes.containsKey(bitsToDecode)) {
+            result = this.existingCodes.get(bitsToDecode);
+        } else {
+            //an array of bits that are calculated through matrix multiplacation
+            //and the bits to decode in array form
+            char[] decodeArray = new char[dimension], wordArray = bitsToDecode.toCharArray();
+
+            //multiply every row in the decoder matrix with the word to get the decoded
+            //value as a matrix of bits
+            for(int i = 0; i < this.dimension; i++) {
+                decodeArray[i] = this.multiplyRows(this.decoderMatrix[i], wordArray);
+            }
+
+            result = new String(decodeArray);
+
+            this.existingCodes.put(bitsToDecode, result);
+        }
+
+        return result;
+    }
+
+    /**
+     * Perform matrix multiplication modulo 2 on two given rows.
+     * @param row1 The first to perform the multiplication on.
+     * @param row2 The second row to perform the multiplication on.
+     * @return The result of the multiplication modulo 2, given as a char.
+     */
+    private char multiplyRows(char[] row1, char[] row2) {
+
+        //the step between a digit and its ascii representation
+        final int asciiStep = 48;
+
+        //the sum of the bits resulting from the matrix multiplication
+        int sum = 0;
+
+        for(int i = 0; i < row1.length; i++) {
+            sum += Character.getNumericValue(row1[i]) * Character.getNumericValue(row2[i]);
+        }
+
+        return(char) ((sum % 2) + asciiStep);
     }
 
     /**

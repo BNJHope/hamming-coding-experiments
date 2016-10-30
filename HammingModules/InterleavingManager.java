@@ -10,11 +10,22 @@ public class InterleavingManager {
      */
     private int dimension;
 
+    /**
+     * The grid of the interleaving table, represented as a 2 dimensional array of characters.
+     */
     private char[][] grid;
+
+    /**
+     * When it has been detected that the size of the interleaving table is bigger than the input string, which will
+     * occur at the end of the file, then this value stores how long the last string is so that the output manager
+     * knows how far into the table it needs to read.
+     */
+    private int EOFIndex;
 
     public InterleavingManager(int dimension) {
         this.dimension = dimension;
         this.grid = new char[dimension][dimension];
+        this.EOFIndex = -1;
     }
 
     /**
@@ -53,10 +64,22 @@ public class InterleavingManager {
 
         int index = 0;
 
+        boolean EOFReached = false;
+
+        if(strToEncode.length() < Math.pow(this.dimension, 2)) {
+            this.EOFIndex = strToEncode.length();
+        }
+
         for(int i = 0; i < this.dimension; i++) {
             for(int j = 0; j < this.dimension; j++) {
                 this.grid[i][j] = strToEncode.charAt(index++);
+                if(index == this.EOFIndex) {
+                    EOFReached = true;
+                    break;
+                }
             }
+            if(EOFReached)
+                break;
         }
     }
 
@@ -66,12 +89,29 @@ public class InterleavingManager {
      */
     private void decodeIn(String strToDecode) {
 
+        //the index of where in the string the interleaver has reaced
         int index = 0;
+
+        //for when we are interleaving with the last bits in the file - determines if the end of the string
+        //has been reached so that the interleaver can break the loops
+        boolean EOFReached = false;
+
+        //if the size of the input string is less than the size of the grid then set the limit to the interleaving
+        //process as the
+        if(strToDecode.length() < Math.pow(this.dimension, 2)) {
+            this.EOFIndex = strToDecode.length();
+        }
 
         for(int i = 0; i < this.dimension; i++) {
             for(int j = 0; j < this.dimension; j++) {
                 this.grid[j][i] = strToDecode.charAt(index++);
+                if(index == this.EOFIndex) {
+                    EOFReached = true;
+                    break;
+                }
             }
+            if(EOFReached)
+                break;
         }
     }
 

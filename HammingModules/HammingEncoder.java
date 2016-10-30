@@ -45,7 +45,7 @@ public class HammingEncoder {
     /**
      * Maps a word to its corresponding codeword if it has previously been constructed.
      */
-    private HashMap<String, String> existingCodes = new HashMap();
+    private HashMap<String, String> existingCodes;
 
     /**
      * Manages the interleaving process.
@@ -68,10 +68,13 @@ public class HammingEncoder {
      */
     public void encode(String filename, int val, double pOfError, double pOfGoodToBad, double pOfBadToGood, int interleaveHeight) {
 
-        //instantiates the burst error model
+        //initialises the existing codes map
+        this.existingCodes = new HashMap();
+
+        //initialises the burst error model
         this.errModel = new BurstErrorModel(pOfError, pOfGoodToBad, pOfBadToGood);
 
-        //instantiates the interleave manager of this Hamming Encoder
+        //initialises the interleave manager of this Hamming Encoder
         this.interleaveManager = new InterleavingManager(interleaveHeight);
 
         //the input from the file and the size of the interleave table
@@ -96,16 +99,25 @@ public class HammingEncoder {
 
         //try to read the file to the end of the file.
         try {
-            while((inputFromFile = this.input.read()) != -1) {
+            while((inputFromFile = this.input.read()) != EOFCONST) {
 
                 //convert the input from the file into the input buffer
                 inBuffer = this.convertIntToBits(inputFromFile);
+
+                //while the size of the input buffer is greater than or equal to the size of the dimension,
+                //remove dimension-sized chunks of the input buffer from the front and convert them into Hamming codes
+                //that can be added to the file
                 while(inBuffer.length() >= this.dimension) {
+
+                    //convert a dimension sized chunk into a Hamming code and add it to the buffer
                     currBuffer = inBuffer.substring(0, this.dimension);
                     outBuff += this.convertToHamming(currBuffer);
 
+                    //while the size of the output buffer is greater than or equal to the size of the interleave
+                    //table, carry out the interleaving process on chunks of the size of the table and add them to
+                    //the output buffer so that they are ready to be added to the file
                     while(outBuff.length() >= interleaveTableSize) {
-                        interleaveOutput = this.interleaveManager.encode(outBuff.substring(0, interleaveTableSize));
+                        interleaveOutput += this.interleaveManager.encode(outBuff.substring(0, interleaveTableSize));
                         outBuff = outBuff.substring(interleaveTableSize);
                     }
 
@@ -119,11 +131,85 @@ public class HammingEncoder {
                 }
             }
 
+        //if there are still bits leftover but not enough to conver into a Hamming codeword on their own
+        //then add 0s onto the end of the buffer till they become long enough to be converted into a Hamming
+        //codeword and transfer the bits.
+        if(inBuffer.length() > 0) {
+
+            outBuff += this.convertToHamming(this.addZeroesToEndOfWord(inBuffer));
+
+            //while the size of the output buffer is greater than or equal to the size of the interleave
+            //table, carry out the interleaving process on chunks of the size of the table and add them to
+            //the output buffer so that they are ready to be added to the file
+            while(outBuff.length() >= interleaveTableSize) {
+                interleaveOutput += this.interleaveManager.encode(outBuff.substring(0, interleaveTableSize));
+                outBuff = outBuff.substring(interleaveTableSize);
+            }
+
+            while(interleaveOutput.length() >= bitsLimit) {
+                charToBeWritten = this.generateErrorString(interleaveOutput.substring(0, bitsLimit));
+                outputToFile(charToBeWritten);
+                interleaveOutput = interleaveOutput.substring(bitsLimit);
+            }
+        }
 
         } catch (IOException e) {
             System.err.println("Error reading file stream.\nClosing.");
             System.exit(0);
         }
+
+        //close the input and output streams.
+        this.cleanUp();
+    }
+
+    /**
+     * If a word is at the end of a file then it may not be long enough to be encoded into a Hamming code word. Therefore,
+     * we add 0s to the end of it so that it is long enough, but this process will not disrupt the decoding process.
+     * @param str The word to add 0s to the end of.
+     * @return The word with 0s on the end.
+     */
+    private String addZeroesToEndOfWord(String word) {
+
+        //while the word's length is less than the dimension, add 0s to the end of it.
+        while(word.length() < this.dimension) {
+            word += '0';
+        }
+
+        return word;
+    }
+
+    /**
+     * Closes the input and output file streams.
+     */
+    private void cleanUp() {
+
+        //try to close the input streams - if it does not work then tell the user.
+        try {
+            this.input.close();
+            this.output.close();
+        } catch (IOException e) {
+            System.err.println("Error closing streams.\nExiting.");
+            System.exit(1);
+        }
+
+    }
+
+    /**
+     * If a string of bits is not long enough to be converted into bytes then add 0s to the end so that
+     * the decoding procedure is not interrupted.
+     * @param strToAdd The string to add 0s to the end of.
+     * @return The string of bits passed to the function with 0s at the end.
+     */
+    private String addZeroesToEnd(String strToAdd) {
+
+        //number of bits in a byte, which is the limit for adding 0s on to.
+        final int bitsInByte = 8;
+
+        //while the string does not have enough characters left yet to form a byte, add 0s to the end
+        while(strToAdd.length() < bitsInByte)
+            strToAdd += '0';
+
+        return strToAdd;
     }
 
     /**
