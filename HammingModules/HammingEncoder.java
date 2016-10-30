@@ -146,11 +146,20 @@ public class HammingEncoder {
                 outBuff = outBuff.substring(interleaveTableSize);
             }
 
+            if(outBuff.length() > 0)
+                interleaveOutput += this.interleaveManager.encode(outBuff);
+
             while(interleaveOutput.length() >= bitsLimit) {
                 charToBeWritten = this.generateErrorString(interleaveOutput.substring(0, bitsLimit));
                 outputToFile(charToBeWritten);
                 interleaveOutput = interleaveOutput.substring(bitsLimit);
             }
+
+            if(interleaveOutput.length() > 0) {
+                charToBeWritten = this.generateErrorString(this.addZeroesToEndOfByte(interleaveOutput));
+                outputToFile(charToBeWritten);
+            }
+
         }
 
         } catch (IOException e) {
@@ -200,7 +209,7 @@ public class HammingEncoder {
      * @param strToAdd The string to add 0s to the end of.
      * @return The string of bits passed to the function with 0s at the end.
      */
-    private String addZeroesToEnd(String strToAdd) {
+    private String addZeroesToEndOfByte(String strToAdd) {
 
         //number of bits in a byte, which is the limit for adding 0s on to.
         final int bitsInByte = 8;
