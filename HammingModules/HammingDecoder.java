@@ -91,12 +91,15 @@ public class HammingDecoder {
         //construct the error correction and decoder matrices using the values from the file name
         this.constructMatrices();
 
+        //number of bits in byte
+        final int bitsInByte = 8;
+
         //the value read in from the input file,
         //and the size of the interleaving table
         int intToReadIn = 0, interleaveSize = (int) Math.pow(this.interleaveHeight, 2);
 
         //string buffers of bits for reading in from the file and writing to the output file.
-        String inBuff = "", interleaveOutput = "", charToWrite = "";
+        String inBuff = "", interleaveOutput = "", outputBuff = "", charToWrite = "";
 
         //try to read in from the file input stream
         try {
@@ -114,10 +117,55 @@ public class HammingDecoder {
                     inBuff = inBuff.substring(interleaveSize);
                 }
 
+                while(interleaveOutput.length() >= wordlength) {
+                    outputBuff += this.decodeCorrectedCode(this.checkForErrors(interleaveOutput.substring(0, wordlength)));
+                    interleaveOutput = interleaveOutput.substring(wordlength);
+                }
+
+                while(outputBuff.length() >= bitsInByte) {
+                    charToWrite = outputBuff.substring(0, bitsInByte);
+                    this.outputToFile(charToWrite);
+                    outputBuff = outputBuff.substring(bitsInByte);
+                }
             }
 
         } catch (IOException e) {
             e.printStackTrace();
+        }
+
+        this.cleanUp();
+        System.out.println("Errors found : " + this.errorCount);
+    }
+    /**
+     * Closes the input and output file streams.
+     */
+    private void cleanUp() {
+
+        //try to close the input streams - if it does not work then tell the user.
+        try {
+            this.input.close();
+            this.output.close();
+        } catch (IOException e) {
+            System.err.println("Error closing streams.\nExiting.");
+            System.exit(1);
+        }
+
+    }
+
+    /**
+     * Writes the given string of bits to the file.
+     * @param strToWrite The bits to write to the file.
+     */
+    private void outputToFile(String strToWrite) {
+
+        //turns the string of bits into the integer that it represents so that it can be written to the file.
+        int infoToWrite = Integer.parseInt(strToWrite, 2);
+
+        try {
+            this.output.write(infoToWrite);
+        } catch (IOException e) {
+            System.err.println("Problem writing with output stream.\nExiting");
+            System.exit(1);
         }
 
     }

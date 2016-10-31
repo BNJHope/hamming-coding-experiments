@@ -149,12 +149,14 @@ public class HammingEncoder {
             //if there are still bits left to be interleaved then add zeroes to the end to make sure that the
             //output buffer can be converted into equal bytes
             if(outBuff.length() > 0) {
-                while(outBuff.length() % 8 != 0) {
+                while((outBuff.length() + interleaveOutput.length()) % bitsLimit != 0) {
                     outBuff += '0';
                 }
                 interleaveOutput += this.interleaveManager.encode(outBuff);
 
-                while(interleaveOutput.length() % bitsLimit != 0) interleaveOutput += '0';
+                while((interleaveOutput.length() % bitsLimit) != 0)
+                    interleaveOutput += '0';
+
             }
 
             while(interleaveOutput.length() >= bitsLimit) {
