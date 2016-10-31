@@ -146,18 +146,21 @@ public class HammingEncoder {
                 outBuff = outBuff.substring(interleaveTableSize);
             }
 
-            if(outBuff.length() > 0)
+            //if there are still bits left to be interleaved then add zeroes to the end to make sure that the
+            //output buffer can be converted into equal bytes
+            if(outBuff.length() > 0) {
+                while(outBuff.length() % 8 != 0) {
+                    outBuff += '0';
+                }
                 interleaveOutput += this.interleaveManager.encode(outBuff);
+
+                while(interleaveOutput.length() % bitsLimit != 0) interleaveOutput += '0';
+            }
 
             while(interleaveOutput.length() >= bitsLimit) {
                 charToBeWritten = this.generateErrorString(interleaveOutput.substring(0, bitsLimit));
                 outputToFile(charToBeWritten);
                 interleaveOutput = interleaveOutput.substring(bitsLimit);
-            }
-
-            if(interleaveOutput.length() > 0) {
-                charToBeWritten = this.generateErrorString(this.addZeroesToEndOfByte(interleaveOutput));
-                outputToFile(charToBeWritten);
             }
 
         }
