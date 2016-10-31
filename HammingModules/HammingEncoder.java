@@ -122,7 +122,8 @@ public class HammingEncoder {
                     }
 
                     while(interleaveOutput.length() >= bitsLimit) {
-                        charToBeWritten = this.generateErrorString(interleaveOutput.substring(0, bitsLimit));
+                        //charToBeWritten = this.generateErrorString(interleaveOutput.substring(0, bitsLimit));
+                        charToBeWritten = interleaveOutput.substring(0, bitsLimit);
                         outputToFile(charToBeWritten);
                         interleaveOutput = interleaveOutput.substring(bitsLimit);
                     }
@@ -136,6 +137,7 @@ public class HammingEncoder {
         //codeword and transfer the bits.
         if(inBuffer.length() > 0) {
 
+            //add 0s to the end of the in buffer until it becomes a whole word so that it can be written to the file
             outBuff += this.convertToHamming(this.addZeroesToEndOfWord(inBuffer));
 
             //while the size of the output buffer is greater than or equal to the size of the interleave
@@ -159,8 +161,11 @@ public class HammingEncoder {
 
             }
 
+            //write the last remaining characters to the file. Interleave output will always have a length that is a
+            //multiple of 8 due to the operation above that we did to add 0s on to the end.
             while(interleaveOutput.length() >= bitsLimit) {
-                charToBeWritten = this.generateErrorString(interleaveOutput.substring(0, bitsLimit));
+                //charToBeWritten = this.generateErrorString(interleaveOutput.substring(0, bitsLimit));
+                charToBeWritten = interleaveOutput.substring(0, bitsLimit);
                 outputToFile(charToBeWritten);
                 interleaveOutput = interleaveOutput.substring(bitsLimit);
             }

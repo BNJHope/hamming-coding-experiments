@@ -13,7 +13,7 @@ public class FileStreamCreator {
      */
     public static final String fileEncodeKeyword = "huff-encode";
 
-    public static final String fileDecodeKeyword = "huff-deocde";
+    public static final String fileDecodeKeyword = "huff-decode";
 
     /**
      * Creates the output stream for a decoder and assigns the object's file output stream

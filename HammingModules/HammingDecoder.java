@@ -129,6 +129,38 @@ public class HammingDecoder {
                 }
             }
 
+            if(inBuff.length() > 0) {
+
+                //decode the remaining input buffer with the interleave table
+                interleaveOutput += this.interleaveManager.decode(inBuff);
+
+                //while the size of the output from the interleave table is greater than the length of a word, error
+                //correct and decode it
+                while(interleaveOutput.length() >= wordlength) {
+                    outputBuff += this.decodeCorrectedCode(this.checkForErrors(interleaveOutput.substring(0, wordlength)));
+                    interleaveOutput = interleaveOutput.substring(wordlength);
+                }
+
+                //if there are still bits left to be interleaved then add zeroes to the end to make sure that the
+                //output buffer can be converted into equal bytes
+                if(interleaveOutput.length() > 0) {
+                    while(interleaveOutput.length() % wordlength != 0) {
+                        interleaveOutput += '0';
+                    }
+                    outputBuff += this.decodeCorrectedCode(this.checkForErrors(interleaveOutput));
+
+                    while((outputBuff.length() % bitsInByte) != 0)
+                       outputBuff += '0';
+
+                }
+
+                while(outputBuff.length() >= bitsInByte) {
+                    charToWrite = outputBuff.substring(0, bitsInByte);
+                    this.outputToFile(charToWrite);
+                    outputBuff = outputBuff.substring(bitsInByte);
+                }
+            }
+
         } catch (IOException e) {
             e.printStackTrace();
         }
