@@ -90,10 +90,9 @@ public class InterleavingManager {
         //the string that is constructed from the interleaving process
         String result = "";
 
-        for(int i = 0; i < this.dimension; i++) {
-            for(int j = 0; j < this.dimension; j++) {
+        for(int i = 0; i < this.wordLength; i++) {
+            for(int j = 0; j < this.height; j++) {
                 result += this.grid[j][i];
-
             }
         }
 
@@ -109,34 +108,10 @@ public class InterleavingManager {
         //the string that is constructed from the interleaving process
         String result = "";
 
-        //if this string of bits is the last to be read from the file, then we need to track that we do not
-        //use too many characters from the grid as they will not all have been formed from the input. Therefore,
-        //this stepper keeps track of which part of the string we are at so we can check if we have reached the input
-        //limit or not
-        int eofStepper = 0;
-
-        //determines if we have reached limit of the end of file string or not
-        boolean EOFReached = false;
-
-        for(int i = 0; i < this.dimension; i++) {
-            for(int j = 0; j < this.dimension; j++) {
+        for(int i = 0; i < this.height; i++) {
+            for(int j = 0; j < this.wordLength; j++) {
                 result += this.grid[i][j];
-
-                //if this is the last string of bits from the file then make sure we track the stepper
-                if(EOFIndex != - 1) {
-                    eofStepper++;
-
-                    //if the stepper has reached the limit then break the inner loop and set the flag
-                    //for breaking the outer loop
-                    if(eofStepper == EOFIndex){
-                        EOFReached = true;
-                        break;
-                    }
-                }
             }
-
-            //if the end of file string limit flag has been set by the inner loop then break the outer loop
-            if(EOFReached) break;
         }
 
         return result;

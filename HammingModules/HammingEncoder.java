@@ -75,10 +75,10 @@ public class HammingEncoder {
         this.errModel = new BurstErrorModel(pOfError, pOfGoodToBad, pOfBadToGood);
 
         //initialises the interleave manager of this Hamming Encoder
-        this.interleaveManager = new InterleavingManager(interleaveHeight);
+        this.interleaveManager = new InterleavingManager(interleaveHeight, this.wordLength);
 
         //the input from the file and the size of the interleave table
-        int inputFromFile = 0, interleaveTableSize = (int) Math.pow(interleaveHeight, 2);
+        int inputFromFile = 0, interleaveTableSize = interleaveHeight * this.wordLength;
 
         //the number of bits in a byte - when we have a string of bits, we need to figure out when it is this long
         //so that it can be written to the file.

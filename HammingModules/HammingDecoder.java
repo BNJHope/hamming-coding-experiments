@@ -86,7 +86,7 @@ public class HammingDecoder {
         this.setUpFileStreams(filename);
 
         //instantiate the interleaving manager from the value given by the file name
-        this.interleaveManager = new InterleavingManager(this.interleaveHeight);
+        this.interleaveManager = new InterleavingManager(this.interleaveHeight, );
 
         //construct the error correction and decoder matrices using the values from the file name
         this.constructMatrices();
