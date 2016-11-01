@@ -86,7 +86,7 @@ public class HammingDecoder {
         this.setUpFileStreams(filename);
 
         //instantiate the interleaving manager from the value given by the file name
-        this.interleaveManager = new InterleavingManager(this.interleaveHeight, );
+        this.interleaveManager = new InterleavingManager(this.interleaveHeight, this.wordlength);
 
         //construct the error correction and decoder matrices using the values from the file name
         this.constructMatrices();
@@ -96,7 +96,7 @@ public class HammingDecoder {
 
         //the value read in from the input file,
         //and the size of the interleaving table
-        int intToReadIn = 0, interleaveSize = (int) Math.pow(this.interleaveHeight, 2);
+        int intToReadIn = 0, interleaveSize = this.wordlength * this.interleaveHeight;
 
         //string buffers of bits for reading in from the file and writing to the output file.
         String inBuff = "", interleaveOutput = "", outputBuff = "", charToWrite = "";
@@ -131,9 +131,14 @@ public class HammingDecoder {
 
             if(inBuff.length() > 0) {
 
+                while(inBuff.length() % wordlength != 0) {
+                    inBuff = inBuff.substring(0, inBuff.length() - 1);
+                }
+                String bp = "";
                 //decode the remaining input buffer with the interleave table
                 interleaveOutput += this.interleaveManager.decode(inBuff);
 
+                bp = "";
                 //while the size of the output from the interleave table is greater than the length of a word, error
                 //correct and decode it
                 while(interleaveOutput.length() >= wordlength) {
@@ -141,18 +146,19 @@ public class HammingDecoder {
                     interleaveOutput = interleaveOutput.substring(wordlength);
                 }
 
-                //if there are still bits left to be interleaved then add zeroes to the end to make sure that the
-                //output buffer can be converted into equal bytes
-                if(interleaveOutput.length() > 0) {
-                    while(interleaveOutput.length() % wordlength != 0) {
-                        interleaveOutput += '0';
-                    }
-                    outputBuff += this.decodeCorrectedCode(this.checkForErrors(interleaveOutput));
-
-                    while((outputBuff.length() % bitsInByte) != 0)
-                       outputBuff += '0';
-
-                }
+                bp = "";
+//                //if there are still bits left to be interleaved then add zeroes to the end to make sure that the
+//                //output buffer can be converted into equal bytes
+//                if(interleaveOutput.length() > 0) {
+//                    while(interleaveOutput.length() % wordlength != 0) {
+//                        interleaveOutput += '0';
+//                    }
+//                    outputBuff += this.decodeCorrectedCode(this.checkForErrors(interleaveOutput));
+//
+//                    while((outputBuff.length() % bitsInByte) != 0)
+//                       outputBuff += '0';
+//
+//                }
 
                 while(outputBuff.length() >= bitsInByte) {
                     charToWrite = outputBuff.substring(0, bitsInByte);

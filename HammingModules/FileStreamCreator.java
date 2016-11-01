@@ -9,11 +9,11 @@ public class FileStreamCreator {
 
     /**
      * The keyword to be added to the file name to show that it is a file that
-     * has been huffman encoded.
+     * has been Hamming encoded.
      */
-    public static final String fileEncodeKeyword = "huff-encode";
+    public static final String fileEncodeKeyword = "hamm-encode";
 
-    public static final String fileDecodeKeyword = "huff-decode";
+    public static final String fileDecodeKeyword = "hamm-decode";
 
     /**
      * Creates the output stream for a decoder and assigns the object's file output stream
@@ -127,7 +127,7 @@ public class FileStreamCreator {
         //retrieve the raw file name by removing everything before the raw file name
         String filename = pathOfFile.substring(pathOfFile.lastIndexOf("/") + 1);
 
-        //The original file name split into the parts before and after the first "." so that the "huff-encode" file name part
+        //The original file name split into the parts before and after the first "." so that the "hamm-encode" file name part
         //can be inserted
         String[] encodedFileNameComps = filename.split("\\.", 2);
 

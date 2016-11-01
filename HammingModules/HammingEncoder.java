@@ -74,11 +74,14 @@ public class HammingEncoder {
         //initialises the burst error model
         this.errModel = new BurstErrorModel(pOfError, pOfGoodToBad, pOfBadToGood);
 
+        //calculate the length and the dimension for Hamming coder using the value provided.
+        this.calculateLengthAndDimension(val);
+
         //initialises the interleave manager of this Hamming Encoder
         this.interleaveManager = new InterleavingManager(interleaveHeight, this.wordLength);
 
         //the input from the file and the size of the interleave table
-        int inputFromFile = 0, interleaveTableSize = interleaveHeight * this.wordLength;
+        int inputFromFile = 0, interleaveTableSize;
 
         //the number of bits in a byte - when we have a string of bits, we need to figure out when it is this long
         //so that it can be written to the file.
@@ -91,8 +94,8 @@ public class HammingEncoder {
         //set up the file streams to be used for writing and reading to a file.
         this.setUpFileStreams(filename, val, interleaveHeight);
 
-        //calculate the length and the dimension for Hamming coder using the value provided.
-        this.calculateLengthAndDimension(val);
+        //now that we have the word length, we can set the interleave table size
+        interleaveTableSize = interleaveHeight * this.wordLength;
 
         //setup the gernator matrix
         this.constructGeneratorMatrix();
@@ -132,13 +135,14 @@ public class HammingEncoder {
                 }
             }
 
-        //if there are still bits leftover but not enough to conver into a Hamming codeword on their own
+        //if there are still bits leftover but not enough to convert into a Hamming codeword on their own
         //then add 0s onto the end of the buffer till they become long enough to be converted into a Hamming
         //codeword and transfer the bits.
-        if(inBuffer.length() > 0) {
+        if(inBuffer.length() > 0 || outBuff.length() > 0) {
 
             //add 0s to the end of the in buffer until it becomes a whole word so that it can be written to the file
-            outBuff += this.convertToHamming(this.addZeroesToEndOfWord(inBuffer));
+            if(inBuffer.length() > 0)
+                outBuff += this.convertToHamming(this.addZeroesToEndOfWord(inBuffer));
 
             //while the size of the output buffer is greater than or equal to the size of the interleave
             //table, carry out the interleaving process on chunks of the size of the table and add them to
@@ -151,14 +155,7 @@ public class HammingEncoder {
             //if there are still bits left to be interleaved then add zeroes to the end to make sure that the
             //output buffer can be converted into equal bytes
             if(outBuff.length() > 0) {
-                while((outBuff.length() + interleaveOutput.length()) % bitsLimit != 0) {
-                    outBuff += '0';
-                }
                 interleaveOutput += this.interleaveManager.encode(outBuff);
-
-                while((interleaveOutput.length() % bitsLimit) != 0)
-                    interleaveOutput += '0';
-
             }
 
             //write the last remaining characters to the file. Interleave output will always have a length that is a
@@ -170,6 +167,11 @@ public class HammingEncoder {
                 interleaveOutput = interleaveOutput.substring(bitsLimit);
             }
 
+            if(interleaveOutput.length() > 0) {
+                charToBeWritten = this.addZeroesToEndOfByte(interleaveOutput);
+                String bp = "";
+                outputToFile(charToBeWritten);
+            }
         }
 
         } catch (IOException e) {

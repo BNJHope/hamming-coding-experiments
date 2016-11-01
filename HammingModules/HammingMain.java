@@ -13,6 +13,6 @@ public class HammingMain {
         HammingEncoder encoder = new HammingEncoder();
         encoder.encode(fileName, val, pOfError, pOfGoodToBad, pOfBadToGood, interleaveHeight);
         HammingDecoder decoder = new HammingDecoder();
-        decoder.decode("/cs/home/bh59/Documents/CS3000/DE/DEP2-error-correction/test_items/loremipsum/loremipsum.huff-encode3-5.txt");
+        decoder.decode("/cs/home/bh59/Documents/CS3000/DE/DEP2-error-correction/test_items/loremipsum/loremipsum.hamm-encode3-5.txt");
     }
 }
