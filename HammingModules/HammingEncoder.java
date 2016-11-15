@@ -58,6 +58,11 @@ public class HammingEncoder {
     private BurstErrorModel errModel;
 
     /**
+     * The channel from where we get the bits.
+     */
+    private Channel bitChannel;
+
+    /**
      * Encodes the file using the given parameters for the burst error model and the height of the interleave table.
      * @param filename The file to encode.
      * @param val The value to determine the dimension and word length of the encoding.
