@@ -44,6 +44,9 @@ public class HammingManager {
         //result from decoding
         DecodingResult decodingResult;
 
+        //The success rate of the error corrections and the average across all iterations
+        double successRate[] = new double[numberOfIterations], successRateAverage;
+
         //construct the Hamming decoder based on the value given for the interleave
         //height and the value for calculating the dimension and word length
         this.encoder = new HammingEncoder(val, interleaveHeight);
@@ -66,8 +69,11 @@ public class HammingManager {
 
             //decode the string of bits that we have
             decodingResult = this.decoder.decode(errorResult);
+
+            successRate[i] = this.calculateSuccessRate(encoderResult.getInputStream(), decodingResult.getResultString());
         }
 
+        successRateAverage = this.getAverage(successRate, numberOfIterations);
     }
 
     /**
@@ -109,4 +115,13 @@ public class HammingManager {
         return successRate;
     }
 
+    public double getAverage(double[] results, int numberOfIterations) {
+        double sum = 0;
+
+        for(int i = 0; i < numberOfIterations; i++) {
+            sum += results[i];
+        }
+
+        return sum / numberOfIterations;
+    }
 }
