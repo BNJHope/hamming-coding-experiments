@@ -50,7 +50,7 @@ public class HammingDecoder {
 
     public HammingDecoder(int val, int interleaveHeight){
         this.existingCodes = new HashMap();
-        this.errorCount = 0;
+
 
         //sets the values of dimension and word length
         this.calculateLengthAndDimension(val);
@@ -70,31 +70,28 @@ public class HammingDecoder {
      * Decodes the given string and tries to correct any errors that it has.
      * @param encodedValue The string of bits to decode.
      */
-    public String decode(String encodedValue) {
+    public DecodingResult decode(String encodedValue) {
 
-        System.out.println("\n\nDecoder Starting. Reading in these values:");
-        for(int i = 0; i < this.interleaveHeight; i++) {
-            System.out.println(encodedValue.substring(i * this.wordlength, i * wordlength + this.wordlength));
-        }
+        DecodingResult result;
 
-        System.out.println();
+        //reset the error count
+        this.errorCount = 0;
 
         //the interleaving manager needs to deal with the input string
-        String interleaveOutput = this.interleaveManager.decode(encodedValue), result = "";
+        String interleaveOutput = this.interleaveManager.decode(encodedValue), outputResult = "";
 
         //an array to keep the code words that we're reading in and the decoded keyword we have as a result
-        String codewords[] = new String[interleaveHeight], decodedWords[] = new String[interleaveHeight];
+        String codewords[] = new String[this.interleaveHeight], correctedWords[] = new String[this.interleaveHeight], decodedWords[] = new String[this.interleaveHeight];
 
         for(int i = 0; i < this.interleaveHeight; i++) {
-
             codewords[i] = interleaveOutput.substring(0, wordlength);
             interleaveOutput = interleaveOutput.substring(wordlength);
-            decodedWords[i] = this.decodeCorrectedCode(this.checkForErrors(codewords[i]));
-            result += decodedWords[i];
-            System.out.println(codewords[i] + " => " + decodedWords[i]);
+            correctedWords[i] = this.checkForErrors(codewords[i]);
+            decodedWords[i] = this.decodeCorrectedCode(correctedWords[i]);
+            outputResult += decodedWords[i];
         }
 
-        System.out.println("Errors found : " + this.errorCount);
+        result = new DecodingResult(this.wordlength, this.interleaveHeight, outputResult, decodedWords, codewords, correctedWords, encodedValue, this.errorCount);
 
         return result;
     }

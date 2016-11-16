@@ -36,7 +36,13 @@ public class HammingManager {
         int numberOfIterations = 5;
 
         //the result from the encoder
-        String encoderResult, errorResult;
+        EncodingResult encoderResult;
+
+        //result from errors
+        String errorResult;
+
+        //result from decoding
+        DecodingResult decodingResult;
 
         //construct the Hamming decoder based on the value given for the interleave
         //height and the value for calculating the dimension and word length
@@ -56,10 +62,10 @@ public class HammingManager {
             encoderResult = this.encoder.encode();
 
             //put errors in the result from the encoder
-            errorResult = this.generateErrorString(encoderResult);
+            errorResult = this.generateErrorString(encoderResult.getInterleavedResult());
 
             //decode the string of bits that we have
-            this.decoder.decode(errorResult);
+            decodingResult = this.decoder.decode(errorResult);
         }
 
     }
@@ -84,4 +90,23 @@ public class HammingManager {
 
         return result;
     }
+
+    public double calculateSuccessRate(String input, String output) {
+
+        int totalBits = input.length(), errorCount = 0;
+
+        double successRate = 0;
+
+        for(int i = 0; i < totalBits; i++) {
+            if(input.charAt(i) != output.charAt(i))
+                errorCount++;
+        }
+
+        if(errorCount != 0) {
+            successRate = ((double) errorCount / (double) totalBits) / 100;
+        }
+
+        return successRate;
+    }
+
 }

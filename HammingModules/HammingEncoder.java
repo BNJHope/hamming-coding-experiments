@@ -1,8 +1,5 @@
 package HammingModules;
 
-import ErrorModels.BurstErrorModel;
-
-import java.io.*;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -63,11 +60,15 @@ public class HammingEncoder {
     /**
      * Creates an stream of bits, where each word has been encoded using Hamming encoding.
      */
-    public String encode(int iterations) {
+    public EncodingResult encode() {
 
-        //a buffer that will store the bits read in from the file
-        //and another one for storing bits to be written to the file.
-        String inBuffer = "", interleaveOutput = "";
+        //the collection of encoding data to return.
+        EncodingResult result;
+
+        //A buffer for all of the words form the channel to be stored,
+        //a buffer for where we put the encoded words before transferring them to the interleaver
+        //and a result from the interleave output.
+        String channelBuffer = "", inBuffer = "", interleaveOutput = "";
 
         //setup the channel for getting in new bits
         this.bitChannel = new Channel(this.dimension);
@@ -86,24 +87,24 @@ public class HammingEncoder {
             //get a bit input from the channel
             wordsToEncode[i] = this.bitChannel.getBits();
 
+            //adds the input from the channel into the buffer
+            channelBuffer += wordsToEncode[i];
+
             //convert the codeword we just fetched into a hamming code
             codewords[i] = this.convertToHamming(wordsToEncode[i]);
 
             //add the codeword to the buffer before we add it to the interleaver
             inBuffer += codewords[i];
 
-            System.out.println(wordsToEncode[i] + " => " + codewords[i]);
         }
 
+        //perform interleaving on the buffer of bits
         interleaveOutput = this.interleaveManager.encode(inBuffer);
 
-        System.out.println("\n\nInterleaving Process produced these results:");
+        //the collection of data to return to the channel.
+        result = new EncodingResult(this.wordLength, this.interleaveHeight, channelBuffer , wordsToEncode, codewords, interleaveOutput);
 
-        for(int i = 0; i < this.interleaveHeight; i++) {
-            System.out.println(interleaveOutput.substring(i * this.wordLength, i * this.wordLength + this.wordLength));
-        }
-
-        return interleaveOutput;
+        return result;
     }
 
     /**
