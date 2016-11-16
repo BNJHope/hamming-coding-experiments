@@ -1,8 +1,5 @@
 package HammingModules;
 
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -10,12 +7,6 @@ import java.util.HashMap;
  * Created by bnjhope on 28/10/16.
  */
 public class HammingDecoder {
-
-    /**
-     * The result that occurs from reading the file
-     * when the reader has reached the end of the file.
-     */
-    private static final int EOFCONST = -1;
 
     /**
      * The dimension of the Hamming codes in the file.
@@ -43,16 +34,6 @@ public class HammingDecoder {
     private char[][] decoderMatrix;
 
     /**
-     * The input stream from the encoded file.
-     */
-    private FileInputStream input;
-
-    /**
-     * The output stream to the decoded file.
-     */
-    private FileOutputStream output;
-
-    /**
      * Manages the interleaving process.
      */
     private InterleavingManager interleaveManager;
@@ -67,164 +48,79 @@ public class HammingDecoder {
      */
     private HashMap<String, String> existingCodes;
 
-    /**
-     * Decodes a given file. Determines the dimension, word length and interleaving height from the file name.
-     * @param filename The file to decode.
-     */
-    public void decode(String filename) {
-
-        //initialises the existing codes map
+    public HammingDecoder(int val, int interleaveHeight){
         this.existingCodes = new HashMap();
-
-        //initialise the error count at 0
         this.errorCount = 0;
 
-        //sets the values of dimension, word length and interleaving table height from the file name
-        this.setFilenameValues(filename);
+        //sets the values of dimension and word length
+        this.calculateLengthAndDimension(val);
 
-        //set up the input and output file streams
-        this.setUpFileStreams(filename);
+        //sets the interleave height from the given arguments
+        this.interleaveHeight = interleaveHeight;
 
         //instantiate the interleaving manager from the value given by the file name
         this.interleaveManager = new InterleavingManager(this.interleaveHeight, this.wordlength);
 
-        //construct the error correction and decoder matrices using the values from the file name
+        //construct the error correction and decoder matrices using the values for word length
+        //and dimension
         this.constructMatrices();
+    }
 
-        //number of bits in byte
-        final int bitsInByte = 8;
+    /**
+     * Decodes the given string and tries to correct any errors that it has.
+     * @param encodedValue The string of bits to decode.
+     */
+    public String decode(String encodedValue) {
 
-        //the value read in from the input file,
-        //and the size of the interleaving table
-        int intToReadIn = 0, interleaveSize = this.wordlength * this.interleaveHeight;
-
-        //string buffers of bits for reading in from the file and writing to the output file.
-        String inBuff = "", interleaveOutput = "", outputBuff = "", charToWrite = "";
-
-        //try to read in from the file input stream
-        try {
-
-            //while the file reader has not reached the end of the file, carry out the error correction and decode process
-            while((intToReadIn = this.input.read()) != EOFCONST) {
-
-                //add the bit representation of the character we just read in onto the end of the buffer
-                inBuff += this.convertToBitString(intToReadIn);
-
-                //while the buff is longer than or equal to the size of the interleave table,
-                //process the characters through the table so that they can be checked for errors and decoded
-                while(inBuff.length() >= interleaveSize) {
-                    interleaveOutput += this.interleaveManager.decode(inBuff.substring(0, interleaveSize));
-                    inBuff = inBuff.substring(interleaveSize);
-                }
-
-                while(interleaveOutput.length() >= wordlength) {
-                    outputBuff += this.decodeCorrectedCode(this.checkForErrors(interleaveOutput.substring(0, wordlength)));
-                    interleaveOutput = interleaveOutput.substring(wordlength);
-                }
-
-                while(outputBuff.length() >= bitsInByte) {
-                    charToWrite = outputBuff.substring(0, bitsInByte);
-                    this.outputToFile(charToWrite);
-                    outputBuff = outputBuff.substring(bitsInByte);
-                }
-            }
-
-            if(inBuff.length() > 0) {
-
-                while(inBuff.length() % wordlength != 0) {
-                    inBuff = inBuff.substring(0, inBuff.length() - 1);
-                }
-                String bp = "";
-                //decode the remaining input buffer with the interleave table
-                interleaveOutput += this.interleaveManager.decode(inBuff);
-
-                bp = "";
-                //while the size of the output from the interleave table is greater than the length of a word, error
-                //correct and decode it
-                while(interleaveOutput.length() >= wordlength) {
-                    outputBuff += this.decodeCorrectedCode(this.checkForErrors(interleaveOutput.substring(0, wordlength)));
-                    interleaveOutput = interleaveOutput.substring(wordlength);
-                }
-
-                bp = "";
-//                //if there are still bits left to be interleaved then add zeroes to the end to make sure that the
-//                //output buffer can be converted into equal bytes
-//                if(interleaveOutput.length() > 0) {
-//                    while(interleaveOutput.length() % wordlength != 0) {
-//                        interleaveOutput += '0';
-//                    }
-//                    outputBuff += this.decodeCorrectedCode(this.checkForErrors(interleaveOutput));
-//
-//                    while((outputBuff.length() % bitsInByte) != 0)
-//                       outputBuff += '0';
-//
-//                }
-
-                while(outputBuff.length() >= bitsInByte) {
-                    charToWrite = outputBuff.substring(0, bitsInByte);
-                    this.outputToFile(charToWrite);
-                    outputBuff = outputBuff.substring(bitsInByte);
-                }
-            }
-
-        } catch (IOException e) {
-            e.printStackTrace();
+        System.out.println("\n\nDecoder Starting. Reading in these values:");
+        for(int i = 0; i < this.interleaveHeight; i++) {
+            System.out.println(encodedValue.substring(i * this.wordlength, i * wordlength + this.wordlength));
         }
 
-        this.cleanUp();
+        System.out.println();
+
+        //the interleaving manager needs to deal with the input string
+        String interleaveOutput = this.interleaveManager.decode(encodedValue), result = "";
+
+        //an array to keep the code words that we're reading in and the decoded keyword we have as a result
+        String codewords[] = new String[interleaveHeight], decodedWords[] = new String[interleaveHeight];
+
+        for(int i = 0; i < this.interleaveHeight; i++) {
+
+            codewords[i] = interleaveOutput.substring(0, wordlength);
+            interleaveOutput = interleaveOutput.substring(wordlength);
+            decodedWords[i] = this.decodeCorrectedCode(this.checkForErrors(codewords[i]));
+            result += decodedWords[i];
+            System.out.println(codewords[i] + " => " + decodedWords[i]);
+        }
+
         System.out.println("Errors found : " + this.errorCount);
-    }
-    /**
-     * Closes the input and output file streams.
-     */
-    private void cleanUp() {
-
-        //try to close the input streams - if it does not work then tell the user.
-        try {
-            this.input.close();
-            this.output.close();
-        } catch (IOException e) {
-            System.err.println("Error closing streams.\nExiting.");
-            System.exit(1);
-        }
-
-    }
-
-    /**
-     * Writes the given string of bits to the file.
-     * @param strToWrite The bits to write to the file.
-     */
-    private void outputToFile(String strToWrite) {
-
-        //turns the string of bits into the integer that it represents so that it can be written to the file.
-        int infoToWrite = Integer.parseInt(strToWrite, 2);
-
-        try {
-            this.output.write(infoToWrite);
-        } catch (IOException e) {
-            System.err.println("Problem writing with output stream.\nExiting");
-            System.exit(1);
-        }
-
-    }
-
-    /**
-     * Converts a given integer into a string of 8 bits.
-     * @param intToConvert The integer to convert into bits.
-     * @return The integer in the form of 8 bits.
-     */
-    private String convertToBitString(int intToConvert) {
-
-        //convert the integer given to the function into a binary string
-        String result = Integer.toBinaryString(intToConvert);
-
-        //add 0s to the front of the string of bits until it has 8 bits in the string, as the toBinaryString method
-        //does not add any 0 bits to the front if they are redundant
-        while(result.length() < 8) {
-            result = '0' + result;
-        }
 
         return result;
+    }
+
+    /**
+     * Calculates and stores the value of the word length and dimension using the value given.
+     * @param val The value with which the word length and dimension should be calculated.
+     */
+    private void calculateLengthAndDimension(int val) {
+
+        //stores the value of 2^val, since both the length and the dimension use it
+        //to calculate their values.
+        int twoPower = 0;
+
+        //if the provided value is not greater than or equal to 2 then we must quit the program.
+        //otherwise, set the value of twoPower to 2^val cast as an integer.
+        if(val < 2) {
+            System.err.println("Value for length and dimension must be greater than or equal to 2.\nExiting.");
+            System.exit(0);
+        } else
+            twoPower = (int) Math.pow(2, (double) val);
+
+        //set the values of the word length and the dimension.
+        this.wordlength = twoPower - 1;
+        this.dimension = twoPower - val - 1;
+
     }
 
     /**
@@ -465,67 +361,6 @@ public class HammingDecoder {
         }
 
         return word;
-    }
-
-    /**
-     * Get the value used for dimension and word length from the encoded file name and also the height of the
-     * interleaving table.
-     * @param filename The file name to get the values from.
-     */
-    private void setFilenameValues(String filename) {
-
-        //in the file name the values that give the dimension/word length come before the value for the interleave height.
-        //Therefore, when we split the string into an array, the value for dimension/word length will come first and then
-        //the interleave height value will come next.
-        final int valLocation = 0, interleaveHeightLocation = 1;
-
-        //the power of two needed to calculate the dimension and word length
-        int twoPower = 0;
-
-        //the part of the file that determines that it is an encoded file. We need this so that we can jump
-        //straight to the part in the file name that contains both the dimension/word length value and the interleaving
-        //value
-        String valFindString = "." + FileStreamCreator.fileEncodeKeyword;
-
-        //removes file name and path to file and also the encode file key word so that we can get the values
-        //that we need
-        String beginningSegment = filename.substring(filename.indexOf(valFindString) + valFindString.length());
-
-        //removes anything after the values that we need
-        String componentsSegment = beginningSegment.substring(0, beginningSegment.indexOf("."));
-
-        //splits the values string into an array of two values - the first determines dimension/word length and the second
-        //determines the height of the interleaving table
-        String[] values = componentsSegment.split("-");
-
-        //the two values in the array converted into integers
-        int val = Integer.parseInt(values[valLocation]), interleaveHeight = Integer.parseInt(values[interleaveHeightLocation]);
-
-        twoPower = (int) Math.pow(2,val);
-
-        //sets the values of this decoder depending on what has been read from the file.
-        this.dimension = twoPower - val - 1;
-
-        this.wordlength = twoPower - 1;
-
-        this.interleaveHeight = interleaveHeight;
-    }
-
-    /**
-     * Sets up the input and output file stream for the decoding.
-     * @param pathOfFile The name of the file to be read.
-     */
-    private void setUpFileStreams(String pathOfFile) {
-
-        //create a new file stream creator
-        FileStreamCreator streamCreator = new FileStreamCreator();
-
-        //create the output stream with the constructed file name
-        this.output = streamCreator.createDecoderOutputStream(pathOfFile);
-
-        //creates the input stream using the name of the file given to the
-        //program.
-        this.input = streamCreator.createInputStream(pathOfFile);
     }
 
 }

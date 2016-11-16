@@ -45,7 +45,7 @@ public class Channel {
         //otherwise add a '1' to the result string.
         for(int i = 0; i < dimension; i++) {
             bitVal = this.randomGen.nextDouble();
-            result += (bitVal < PROBABILITY_OF_ZERO_BIT) ? '0' : 1;
+            result += (bitVal < PROBABILITY_OF_ZERO_BIT) ? '0' : '1';
         }
 
         return result;

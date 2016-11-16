@@ -5,16 +5,12 @@ package HammingModules;
  */
 public class InterleavingManager {
 
-    /**
-     * The constant we use for the EOFStringSize to determine that we are not using it as it is not the last file
-     */
-    private static final int NOT_IN_USE = -1;
 
     /**
      * The height of the grid that the interleaving table represents
      * and the word length for the width of the grid.
      */
-    private int height, wordLength, gridSize, EOFStringSize;
+    private int height, wordLength;
 
     /**
      * The grid of the interleaving table, represented as a 2 dimensional array of characters.
@@ -24,8 +20,6 @@ public class InterleavingManager {
     public InterleavingManager(int height, int wordLength) {
         this.height = height;
         this.wordLength = wordLength;
-        this.gridSize = height * wordLength;
-        this.EOFStringSize = NOT_IN_USE;
         this.grid = new char[height][wordLength];
     }
 
@@ -65,19 +59,9 @@ public class InterleavingManager {
 
         int index = 0;
 
-        boolean EOFString = false;
-
-        for(int i = 0; i < this.height; i++) {
-            for(int j = 0; j < this.wordLength; j++) {
-                this.grid[i][j] = strToEncode.charAt(index++);
-                if((strToEncode.length() < this.gridSize) && (index == strToEncode.length())) {
-                    EOFString = true;
-                    this.EOFStringSize = strToEncode.length();
-                    break;
-                }
-            }
-            if(EOFString) break;
-        }
+        for(int row = 0; row < this.height; row++)
+            for(int col = 0; col < this.wordLength; col++)
+                this.grid[row][col] = strToEncode.charAt(index++);
     }
 
     /**
@@ -89,19 +73,10 @@ public class InterleavingManager {
         //the index of where in the string the interleaver has reaced
         int index = 0;
 
-        boolean EOFString = false;
+        for(int col = 0; col < this.wordLength; col++)
+            for(int row = 0; row < this.height; row++)
+                this.grid[row][col] = strToDecode.charAt(index++);
 
-        for(int i = 0; i < this.wordLength; i++) {
-            for(int j = 0; j < this.height; j++) {
-                this.grid[j][i] = strToDecode.charAt(index++);
-                if((strToDecode.length() < this.gridSize) && (index == strToDecode.length())) {
-                    EOFString = true;
-                    this.EOFStringSize = strToDecode.length();
-                    break;
-                }
-            }
-            if(EOFString) break;
-        }
     }
 
     /**
@@ -113,21 +88,9 @@ public class InterleavingManager {
         //the string that is constructed from the interleaving process
         String result = "";
 
-        int index = 0;
-
-        boolean EOFStringReached = false;
-
-        for(int i = 0; i < this.wordLength; i++) {
-            for(int j = 0; j < this.height; j++) {
-                result += this.grid[j][i];
-                index++;
-                if(this.EOFStringSize != NOT_IN_USE && index == this.EOFStringSize) {
-                    EOFStringReached = true;
-                    break;
-                }
-            }
-            if(EOFStringReached) break;
-        }
+        for(int col = 0; col < this.wordLength; col++)
+            for(int row = 0; row < this.height; row++)
+                result += this.grid[row][col];
 
         return result;
     }
@@ -141,24 +104,11 @@ public class InterleavingManager {
         //the string that is constructed from the interleaving process
         String result = "";
 
-        int index = 0;
-
-        boolean EOFStringReached = false;
-
-        for(int i = 0; i < this.height; i++) {
-            for(int j = 0; j < this.wordLength; j++) {
-                result += this.grid[i][j];
-                index++;
-                if(this.EOFStringSize != NOT_IN_USE && index == this.EOFStringSize) {
-                    EOFStringReached = true;
-                    break;
-                }
-            }
-            if(EOFStringReached) break;
-        }
+        for(int row = 0; row < this.height; row++)
+            for(int col = 0; col < this.wordLength; col++)
+                result += this.grid[row][col];
 
         return result;
-
     }
 
 }
