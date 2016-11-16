@@ -1,4 +1,4 @@
-package source.HammingModules;
+package HammingCoding.HammingModules;
 
 /**
  * Created by bh59 on 16/11/16.

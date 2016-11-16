@@ -1,4 +1,4 @@
-package source.ErrorModels;
+package HammingCoding.ErrorModels;
 
 /**
  * Created by bnjhope on 20/10/16.

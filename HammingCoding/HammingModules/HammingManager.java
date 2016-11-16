@@ -1,6 +1,6 @@
-package source.HammingModules;
+package HammingCoding.HammingModules;
 
-import source.ErrorModels.BurstErrorModel;
+import HammingCoding.ErrorModels.BurstErrorModel;
 
 /**
  * Created by bnjhope on 16/11/16.
@@ -30,15 +30,7 @@ public class HammingManager {
      * @param pOfBadToGood The probability that while being in a bad state that the model flips into a good state.
      * @param interleaveHeight The height of the interleaving table to be used.
      */
-    public void doHammingProcess(int val, double pOfError, double pOfGoodToBad, double pOfBadToGood, int interleaveHeight, boolean singleOutput) {
-
-        //the number of iterations we want to during encoding.
-        int numberOfIterations;
-
-        if(singleOutput)
-            numberOfIterations = 3;
-        else
-            numberOfIterations = 1000;
+    public void doHammingProcess(int val, double pOfError, double pOfGoodToBad, double pOfBadToGood, int interleaveHeight, String outputType, int numberOfIterations) {
 
         //the result from the encoder
         EncodingResult encoderResult;
@@ -72,7 +64,7 @@ public class HammingManager {
             //produce an encoding result
             encoderResult = this.encoder.encode();
 
-            if(singleOutput) {
+            if(outputType.equals("-o")) {
                 encoderResult.outputCodewordConversions();
                 encoderResult.outputInterleaveResults();
             }
@@ -83,7 +75,7 @@ public class HammingManager {
             //decode the string of bits that we have
             decodingResult = this.decoder.decode(errorResult);
 
-            if(singleOutput) {
+            if(outputType.equals("-o")) {
                 decodingResult.outputReceivedWords();
                 decodingResult.outputCodewordConversions();
             }
@@ -95,7 +87,28 @@ public class HammingManager {
         //total bits transferred in all iterations
         successRateAverage = this.getAverage(totalErrorCount, totalBitsTransferred);
 
-        System.out.println(String.format("r : %d \t pOfError : %.1f \t pGB : %.1f \t pBG : %.1f \t Interleave Height : %d \t Average Success Rate : %f", val, pOfError, pOfGoodToBad, pOfBadToGood, interleaveHeight, successRateAverage));
+        if(outputType.equals("-o") || outputType.equals("-t"))
+            System.out.println(String.format("r : %d \t pOfError : %.1f \t pGB : %.1f \t pBG : %.1f \t Interleave Height : %d \t Average Success Rate : %%%f", val, pOfError, pOfGoodToBad, pOfBadToGood, interleaveHeight, successRateAverage));
+        else {
+            switch(outputType) {
+                case "-r" :
+                    System.out.print(String.format("(%d,%.2f) ", val, successRateAverage));
+                    break;
+                case "-ih" :
+                    System.out.print(String.format("(%d,%.2f) ", interleaveHeight, successRateAverage));
+                    break;
+                case "-pe" :
+                    System.out.print(String.format("(%.1f,%.2f) ", pOfError, successRateAverage));
+                    break;
+                case "-pgb" :
+                    System.out.print(String.format("(%.1f,%.2f) ", pOfGoodToBad, successRateAverage));
+                    break;
+                case "-pbg" :
+                    System.out.print(String.format("(%.1f,%.2f) ", pOfBadToGood, successRateAverage));
+                    break;
+            }
+        }
+
     }
 
     /**

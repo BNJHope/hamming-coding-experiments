@@ -1,4 +1,4 @@
-package source.HammingModules;
+package HammingCoding.HammingModules;
 
 import java.util.Random;
 

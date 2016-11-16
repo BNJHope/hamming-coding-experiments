@@ -1,4 +1,4 @@
-package source.ErrorModels;
+package HammingCoding.ErrorModels;
 
 import java.util.Random;
 
