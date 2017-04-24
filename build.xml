@@ -3,12 +3,12 @@
     <property name="src.dir"     value="HammingCoding"/>
     <property name="build.dir"   value="build"/>
     <property name="classes.dir" value="${build.dir}/classes"/>
-    <property name="jar.dir"     value="."/>
+	<property name="jar.dir"     value="dist"/>
     <property name="main-class"  value="HammingCoding.HammingMain"/>
 
     <target name="clean">
         <delete dir="${build.dir}"/>
-        <delete file="${jar.dir}/${ant.project.name}.jar"/>
+		<delete dir="${jar.dir}"/>
     </target>
 
     <target name="compile">
